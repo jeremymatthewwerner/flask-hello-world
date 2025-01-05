@@ -1,26 +1,86 @@
-from flask import Flask, send_file
-from PIL import Image, ImageDraw
-from io import BytesIO
+from flask import Flask, render_template, send_from_directory
+from flask.templating import render_template_string
+import logging
 
 app = Flask(__name__)
 
+# CSS styles
+STYLES = '''
+    #canvas {
+        border: 1px solid black;
+    }
+'''
+
+# JavaScript animation code
+ANIMATION_SCRIPT = '''
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const duckSound = new Audio('static/duck.mp3');
+    
+    let x = 150;
+    let y = 150;
+    let dx = 4;
+    let dy = 4;
+    const radius = 50;
+    
+    function playDuckSound() {
+        duckSound.currentTime = 0;
+        duckSound.play();
+    }
+    
+    function drawCircle() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+        ctx.strokeStyle = '#00FF00';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        if (x + radius > canvas.width || x - radius < 0) {
+            dx = -dx;
+            playDuckSound();
+        }
+        if (y + radius > canvas.height || y - radius < 0) {
+            dy = -dy;
+            playDuckSound();
+        }
+        
+        x += dx;
+        y += dy;
+        
+        requestAnimationFrame(drawCircle);
+    }
+    
+    drawCircle();
+'''
+
 @app.route('/')
 def draw_circle():
-    # Create a new image with white background
-    img = Image.new('RGB', (400, 400), 'white')
-    draw = ImageDraw.Draw(img)
-    
-    # Draw a black circle
-    # Parameters: [left, top, right, bottom]
-    draw.ellipse([100, 100, 300, 300], outline='black', width=2)
-    
-    # Save image to memory buffer
-    img_io = BytesIO()
-    img.save(img_io, 'PNG')
-    img_io.seek(0)
-    
-    # Return the image as a response
-    return send_file(img_io, mimetype='image/png')
+    html = f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            {STYLES}
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="800" height="600"></canvas>
+        <script>
+            {ANIMATION_SCRIPT}
+        </script>
+    </body>
+    </html>
+    '''
+    return render_template_string(html)
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('static', filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.logger.setLevel(logging.DEBUG)
+    app.run(debug=True, port=8000)
