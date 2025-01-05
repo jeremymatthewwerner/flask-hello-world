@@ -1,0 +1,3 @@
+name: bouncing-circles
+runtime: python
+description: A Flask application with bouncing circles deployed to AWS ECS 
