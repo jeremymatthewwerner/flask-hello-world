@@ -9,6 +9,19 @@ STYLES = '''
     #canvas {
         border: 1px solid black;
     }
+    #colorPicker {
+        margin: 10px;
+        padding: 10px;
+        background: #f0f0f0;
+        border-radius: 5px;
+    }
+    .color-btn {
+        margin: 5px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
 '''
 
 # JavaScript animation code
@@ -22,6 +35,23 @@ ANIMATION_SCRIPT = '''
     let dx = 4;
     let dy = 4;
     const radius = 50;
+    let circleColor = 'red';  // default color
+    
+    const rainbowColors = {
+        'Red': '#FF0000',
+        'Orange': '#FF7F00',
+        'Yellow': '#FFFF00',
+        'Green': '#00FF00',
+        'Blue': '#0000FF',
+        'Indigo': '#4B0082',
+        'Violet': '#8F00FF'
+    };
+
+    function setColor(color) {
+        circleColor = color;
+        document.getElementById('colorPicker').style.display = 'none';
+        drawCircle();
+    }
     
     function playDuckSound() {
         duckSound.currentTime = 0;
@@ -33,7 +63,7 @@ ANIMATION_SCRIPT = '''
         
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = circleColor;
         ctx.fill();
         ctx.strokeStyle = '#00FF00';
         ctx.lineWidth = 2;
@@ -53,8 +83,6 @@ ANIMATION_SCRIPT = '''
         
         requestAnimationFrame(drawCircle);
     }
-    
-    drawCircle();
 '''
 
 @app.route('/')
@@ -68,6 +96,16 @@ def draw_circle():
         </style>
     </head>
     <body>
+        <div id="colorPicker">
+            <h3>Choose a color for the circle:</h3>
+            <button class="color-btn" style="background: #FF0000" onclick="setColor('#FF0000')">Red</button>
+            <button class="color-btn" style="background: #FF7F00" onclick="setColor('#FF7F00')">Orange</button>
+            <button class="color-btn" style="background: #FFFF00" onclick="setColor('#FFFF00')">Yellow</button>
+            <button class="color-btn" style="background: #00FF00" onclick="setColor('#00FF00')">Green</button>
+            <button class="color-btn" style="background: #0000FF" onclick="setColor('#0000FF')">Blue</button>
+            <button class="color-btn" style="background: #4B0082" onclick="setColor('#4B0082')">Indigo</button>
+            <button class="color-btn" style="background: #8F00FF" onclick="setColor('#8F00FF')">Violet</button>
+        </div>
         <canvas id="canvas" width="800" height="600"></canvas>
         <script>
             {ANIMATION_SCRIPT}
